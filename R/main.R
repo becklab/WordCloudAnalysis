@@ -185,10 +185,10 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #' stats <- wordcloudstats(group1, group2, names=c('Group 1','Group 2'))
 #' qval <- runif(nrow(stats$frequency),0.0,1.0)
 #' names(qval) <- rownames(stats$outputs)
-#' comparisonplot_sizebysig(stats$frequency, stats$counts, qval, colors=c('blue','green','red'))
+#' comparisonplot_colbycount(stats$frequency, stats$counts, qval, colors=c('blue','green','red'))
 #'                    
 #' @seealso \code{\link[wordcloud]{wordlayout}}
-comparisonplot_sizebysig <- function(freq, counts, qvals, colors=c('red','blue','black'), size.limits=50:1/20,
+comparisonplot_colbycount <- function(freq, counts, qvals, colors=c('red','blue','black'), size.limits=50:1/20,
                            xlim=c(-0.5,1),ylim=c(-0.5,1), axes=FALSE, xlab='Group 1', ylab='Group 2') {
   
   # Transform q-values
@@ -238,7 +238,7 @@ comparisonplot_sizebysig <- function(freq, counts, qvals, colors=c('red','blue',
 #' term is inversely related to the q-values provided. The color of each term
 #' indicates whether the corresponding q-value was less than the specified cutoff. 
 #' Finally, the diagonal (representing words of equal frequencies for each group) is
-#' superimposed on the word cloud.
+#' superimposed on the word cloud. For size based on frequency, see \link{comparisonplot_colbycount}.
 #' 
 #' Note that all parameters must describe the same number of terms.
 #' 
