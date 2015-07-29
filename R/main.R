@@ -142,7 +142,9 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #' @description Main user interface for qualitative analysis of two word clouds.
 #' Creates a plot with frequencies of each group on each axis. The size of each
 #' term is inversely related to the q-values provided. The color of each term
-#' indicates which group had the greater number of counts for the term occurrence.
+#' indicates which group had the greater number of counts for the term occurrence. 
+#' Finally, the diagonal (representing words of equal frequencies for each group) is
+#' superimposed on the word cloud.
 #' 
 #' Note that all parameters must describe the same number of terms.
 #' 
@@ -169,6 +171,13 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #'             Defaults to \code{c(-0.5,1)}.
 #' @param ylim A numeric vector of length two with the lower and upper bounds for the y-axis of the graph.
 #'             Defaults to \code{c(-0.5,1)}.
+#' @param axes A boolean value specifying whether axes (frequencies) should be shown. Note that for large
+#'             data sets, the words may displace each other so much that the axes do not provide a meaningful
+#'             reference. Defaults to \code{FALSE}.
+#' @param xlab A label for the x-axis. If \code{axes=FALSE}, the label is placed in the general area where
+#'             it would be if there were axes. Defaults to 'Group 1'.
+#' @param ylab A label for the y-axis. If \code{axes=FALSE}, the label is placed in the general area where
+#'             it would be if there were axes. Defaults to 'Group 2'.
 #'                    
 #' @examples
 #' group1 <- c('head','toe','hand',rep('knee',4))
@@ -177,11 +186,11 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #' stats <- wordcloudstats(group1, group2, names=c('Group 1','Group 2'))
 #' qval <- runif(nrow(stats$frequency),0.0,1.0)
 #' names(qval) <- rownames(stats$outputs)
-#' comparisonplot(stats$frequency, stats$counts, qval, colors=c('blue','green','red'))
+#' comparisonplot_sizebysig(stats$frequency, stats$counts, qval, colors=c('blue','green','red'))
 #'                    
 #' @seealso \code{\link[wordcloud]{wordlayout}}
-comparisonplot <- function(freq, counts, qvals, colors=c('red','blue','black'), size.limits=50:1/20,
-                           xlim=c(-0.5,1),ylim=c(-0.5,1)) {
+comparisonplot_sizebysig <- function(freq, counts, qvals, colors=c('red','blue','black'), size.limits=50:1/20,
+                           xlim=c(-0.5,1),ylim=c(-0.5,1), axes=FALSE, xlab='Group 1', ylab='Group 2') {
   
   # Transform q-values
   terms <- names(qvals)
@@ -216,7 +225,9 @@ comparisonplot <- function(freq, counts, qvals, colors=c('red','blue','black'), 
   
   # Generate plot
   message('Plotting results...')
-  plot(freq[,1],freq[,2],type='n',xlim=xlim,ylim=ylim)
+  plot(freq[,1],freq[,2],type='n',xlim=xlim,ylim=ylim,axes=axes,xlab=xlab,ylab=ylab)
   wl <- wordcloud::wordlayout(freq[,1],freq[,2],rownames(freq),cex=scaled.vals)
   text(wl[,1]+.5*wl[,3], wl[,2]+.5*wl[,4], rownames(freq), cex=scaled.vals, col=applied.colors)
+  par(new=T)
+  abline(0,1)
 }
