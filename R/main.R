@@ -144,7 +144,8 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #' term is inversely related to the q-values provided. The color of each term
 #' indicates which group had the greater number of counts for the term occurrence. 
 #' Finally, the diagonal (representing words of equal frequencies for each group) is
-#' superimposed on the word cloud.
+#' superimposed on the word cloud. To plot with significance as color and size, see
+#' \link{comparisonplot_colbysig}.
 #' 
 #' Note that all parameters must describe the same number of terms.
 #' 
@@ -157,8 +158,6 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
 #' @param qvals A vector of q-values for each of the terms. The names for the vector
 #'              must be the terms. Q-values of 0 are rounded to 0.00001. Note that there
 #'              must be at least two distinct q-values (i.e., they cannot all be 1).
-#' @param direction A vector of numeric values indicating whether the term belongs to
-#'                  group 1 or 2. The names of the vector must be the terms.
 #' @param colors A character vector of length three. The first element represents the color
 #'               that the term should be plotted in if the count value is greater in the 
 #'               first group compared to the second group. The second element represents
@@ -228,6 +227,90 @@ comparisonplot_sizebysig <- function(freq, counts, qvals, colors=c('red','blue',
   plot(freq[,1],freq[,2],type='n',xlim=xlim,ylim=ylim,axes=axes,xlab=xlab,ylab=ylab)
   wl <- wordcloud::wordlayout(freq[,1],freq[,2],rownames(freq),cex=scaled.vals)
   text(wl[,1]+.5*wl[,3], wl[,2]+.5*wl[,4], rownames(freq), cex=scaled.vals, col=applied.colors)
+  par(new=T)
+  abline(0,1)
+}
+
+#' @export
+#' @title Qualitative plot of comparison for two word clouds
+#' @description Main user interface for qualitative analysis of two word clouds.
+#' Creates a plot with frequencies of each group on each axis. The size of each
+#' term is inversely related to the q-values provided. The color of each term
+#' indicates whether the corresponding q-value was less than the specified cutoff. 
+#' Finally, the diagonal (representing words of equal frequencies for each group) is
+#' superimposed on the word cloud.
+#' 
+#' Note that all parameters must describe the same number of terms.
+#' 
+#' @param freq A numeric matrix with two columns. The first column indicates the
+#'             frequency of a term in the first group, and the second column indicates
+#'             frequency of a term in the second group. The rows describe terms. Rownames
+#'             must be set to the terms.
+#' @param qvals A vector of q-values for each of the terms. The names for the vector
+#'              must be the terms. Q-values of 0 are rounded to 0.00001. Note that there
+#'              must be at least two distinct q-values (i.e., they cannot all be 1).
+#' @param colors A character vector of length two. The first element corresponds to the color
+#'               that should be used for significant (q < \code{cutoff}) terms. 
+#'               Defaults to \code{c('red','black')}
+#' @param size.limits Bounds for the sizes of the words. Must be provided in the format max:min.
+#'                    The sizes are interpreted by \code{cex}, so they are scaled. Defaults to \code{50:1/20}.
+#' @param xlim A numeric vector of length two with the lower and upper bounds for the x-axis of the graph.
+#'             Defaults to \code{c(-0.5,1)}.
+#' @param ylim A numeric vector of length two with the lower and upper bounds for the y-axis of the graph.
+#'             Defaults to \code{c(-0.5,1)}.
+#' @param axes A boolean value specifying whether axes (frequencies) should be shown. Note that for large
+#'             data sets, the words may displace each other so much that the axes do not provide a meaningful
+#'             reference. Defaults to \code{FALSE}.
+#' @param xlab A label for the x-axis. If \code{axes=FALSE}, the label is placed in the general area where
+#'             it would be if there were axes. Defaults to 'Group 1'.
+#' @param ylab A label for the y-axis. If \code{axes=FALSE}, the label is placed in the general area where
+#'             it would be if there were axes. Defaults to 'Group 2'.
+#'                    
+#' @examples
+#' group1 <- c('head','toe','hand',rep('knee',4))
+#' group2 <- c(rep('toe',3),'hand',rep('head',2))
+#'
+#' stats <- wordcloudstats(group1, group2, names=c('Group 1','Group 2'))
+#' qval <- runif(nrow(stats$frequency),0.0,1.0)
+#' names(qval) <- rownames(stats$outputs)
+#' comparisonplot_colbysig(stats$frequency, qval, cutoff=0.4, colors=c('blue','black'))
+#'                    
+#' @seealso \code{\link[wordcloud]{wordlayout}}
+comparisonplot_colbysig <- function(freq, qvals, cutoff=0.05, colors=c('red','black'), size.limits=50:1/20,
+                                    xlim=c(-0.5,1),ylim=c(-0.5,1), axes=FALSE, xlab='Group 1', ylab='Group 2') {
+  # Transform q-values
+  terms <- names(qvals)
+  qvals.mod <- qvals
+  qvals.mod[qvals==0] <- 0.00001
+  qvals.mod <- -log10(qvals.mod)+1
+  names(qvals.mod) <- terms
+  
+  # Ensure everything is in the same order by terms
+  qvals.mod <- qvals.mod[rownames(freq)]
+  
+  # Scale q-values to size.limits
+  message('Scaling q-values...')
+  mn.sc <- min(size.limits)
+  mx.sc <- max(size.limits)
+  mn.q <- min(qvals.mod)
+  mx.q <- max(qvals.mod)
+  scaled.vals <- abs(unlist(lapply(qvals.mod,function(x){
+    ((x-mn.q) * (mx.sc-mn.sc)) / (mx.q-mn.q) + mn.sc
+  })))
+  
+  # Generate colors by terms significant (q < cutoff, binary)
+  message('Computing colors...')
+  sig.q <- qvals < cutoff
+  cols <- rep('black',length(sig.q))
+  cols[sig.q] <- colors[1]
+  cols[!sig.q] <- colors[2]
+  message(sum(sig.q))
+  
+  # Generate plot
+  message('Plotting results...')
+  plot(freq[,1],freq[,2],type='n',xlim=xlim,ylim=ylim,axes=axes,xlab=xlab,ylab=ylab)
+  wl <- wordcloud::wordlayout(freq[,1],freq[,2],rownames(freq),cex=scaled.vals)
+  text(wl[,1]+.5*wl[,3], wl[,2]+.5*wl[,4], rownames(freq), cex=scaled.vals, col=cols)
   par(new=T)
   abline(0,1)
 }
