@@ -131,7 +131,7 @@ wordcloudstats <- function(text1, text2, names, avoid.words=NULL) {
   mat.val <- cbind(text1.in,text1.out,text2.in,text2.out,pvals,p.adj,g.in)
   present.names <- paste('count.in',names,sep='.')
   absent.names <- paste('unmatched.term.count',names,sep='.')
-  mat.names <- c(present.names[1],absent.names[1], present.names[2],absent.names[2],'p.Value','bh.Value','greater.frequency.in')
+  mat.names <- c(present.names[1],absent.names[1], present.names[2],absent.names[2],'p.value','bh.value','greater.frequency.in')
   colnames(mat.val) <- mat.names
 
   list(outputs=mat.val,counts=count,frequency=freq)
