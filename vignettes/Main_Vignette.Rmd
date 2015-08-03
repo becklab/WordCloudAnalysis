@@ -65,7 +65,7 @@ Let's take a look at how we can use this function. Note that the dummy data woul
 qvals <- runif(nrow(stats$frequency), 0.0, 1.0)
 names(qvals) <- rownames(stats$frequency)
 
-comparisonplot(stats$frequency, stats$counts, qvals, colors=c('blue','red','green'))
+comparisonplot_colbycount(stats$frequency, stats$counts, qvals, colors=c('blue','red','green'))
 ```
 
 ## Wrapping Up
