@@ -4,8 +4,21 @@
 # Get character vector of all background terms
 background <- read.csv('~/WordCloudStats/Data/Inflammation_C2_DistUp.csv')
 background <- rownames(background)
+
+# Combine appropriate C2 words
+background <- gsub('_(B|T)_([A-Z0-9]+)',paste('_','\\1','\\2',sep=''),background)
+background <- gsub('_(IL)_(3)_(5)',paste('_','\\1','\\2','\\3',sep=''),background)
+background <- gsub('_(IL)_([0-9]+)',paste('_','\\1','\\2',sep=''),background)
+background <- gsub('(CLUSTER)_([0-9]+)',paste('_','\\1','\\2',sep=''),background)
+background <- gsub('(GRADE)_([0-9]+)_VS_([0-9]+)',paste('_','\\1','\\2','v','\\3',sep=''),background)
+background <- gsub('_APC_C','_APCC',background)
+background <- gsub('_CLASS_([A-Z0-9]+)',paste0('_CLASS','\\1'),background)
+background <- gsub('_GAMMA_R','_GAMMAR',background)
+background <- gsub('GM_CSF','GMCSF',background)
+background <- gsub('ES_1','ES1',background)
 background <- gsub('[A-Z]+_(.*)','\\1',background)
 background <- unlist(strsplit(background,'_'))
+
 
 # Words we do not want
 C2_stopwords <- c("I", "HE", "THEIR", "ARE", "DOING", "YOU'VE", "WE'LL", "WOULDN'T", "WHEN'S", "UNTIL", "BEFORE", "UNDER", "BOTH", "SAME", "ME", "HIM", "THEIRS", "WAS",
@@ -18,7 +31,8 @@ C2_stopwords <- c("I", "HE", "THEIR", "ARE", "DOING", "YOU'VE", "WE'LL", "WOULDN
                   "WHEN", "SUCH", "OURS", "HERS", "WHOM", "HAVE", "YOU'RE", "SHE'D", "HASN'T", "MUSTN'T", "THE", "WITH", "UP", "THERE", "SOME", "YOURS", "ITSELF",
                   "THOSE", "DO", "WE'RE", "YOU'LL", "DON'T", "WHAT'S", "OR", "INTO", "ON", "HOW", "NOT", "YOURSELF", "THEY", "AM", "DOES", "THEY'RE", "HE'LL",
                   "DIDN'T", "HERE'S", "BECAUSE", "THROUGH", "OFF", "ALL", "ONLY", "YOURSELVES", "THEM", "IS", "DID", "I'VE", "SHE'LL", "WON'T", "THERE'S", "AS",
-                  "DURING", "OVER", "ANY", "OWN", "LISTYOURUNIQUEWORDSHERE", "DN", "UP", "DN1", "UP1", "UP2", "DN2", "HR", "VS", "VIA", "EARLY", "LATE")
+                  "DURING", "OVER", "ANY", "OWN", "LISTYOURUNIQUEWORDSHERE", "DN", "UP", "DN1", "UP1", "UP2", "DN2", "HR", "VS", "VIA", "EARLY", "LATE",'3D','8D','10D',
+                  '10D','16D')
 
 # Luminal A
 luma <- read.csv('~/WordCloudStats/Data/C2_Inflammation_LumA_DistUp.txt',sep='\n')
